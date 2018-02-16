@@ -28,7 +28,25 @@ app.set('view engine', 'pug');
 const passport = require('passport');
 const jwt = require('express-jwt');
 app.use(passport.initialize());
+require('./auth/passport').setup(config);
 
+app.use(
+  jwt({
+    secret: config.secrets.session,
+    credentialsRequired: false,
+    getToken: function fromHeaderOrQuerystring(req) {
+      if (
+        req.headers.authorization &&
+        req.headers.authorization.split(' ')[0] === 'Bearer'
+      ) {
+        return req.headers.authorization.split(' ')[1];
+      } else if (req.query && req.query.token) {
+        return req.query.token;
+      }
+      return null;
+    }
+  })
+);
 //#endregion
 
 // uncomment after placing your favicon in /public
