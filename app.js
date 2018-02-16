@@ -50,6 +50,25 @@ app.use(express.static(path.join(__dirname, 'public')));
 //#region Graphql
 const { graphqlExpress, graphiqlExpress } = require('graphql-server-express');
 
+const schema = require('./api');
+
+app.use(
+  '/api',
+  bodyParser.json(),
+  graphqlExpress({
+    schema: schema
+  })
+);
+
+app.use(
+  '/graphiql',
+  graphiqlExpress({
+    schema: schema,
+    endpointURL: '/api',
+    graphiql: true,
+    subscriptionsEndpoint: `ws://localhost:${config.port}/subscriptions`
+  })
+);
 //#endregion
 
 //#region catch Error

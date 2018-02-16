@@ -9,6 +9,8 @@ var debug = require('debug')('konkurs:server');
 var http = require('http');
 var config = require('../config');
 const { execute, subscribe } = require('graphql');
+const schema = require('../api');
+const { SubscriptionServer } = require('subscriptions-transport-ws');
 
 /**
  * Get port from environment and store in Express.
@@ -30,6 +32,17 @@ var server = http.createServer(app);
 server.listen(config.port, () => {
   console.log(
     `GraphQL Server is now running on http://localhost:${config.port}`
+  );
+  new SubscriptionServer(
+    {
+      schema,
+      execute,
+      subscribe,
+      onConnect: () => {
+        if (config.env == 'development') console.log('Client connected');
+      }
+    },
+    { server, path: '/subscriptions' }
   );
 });
 server.on('error', onError);
